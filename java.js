@@ -1,75 +1,68 @@
-// Typing animation for the "Welcome" text on Home section
-const text = "Welcome to my portfolio!";
-let i = 0;
-const typingElement = document.querySelector(".typing");
+// Typing animation
+const typingElement = document.querySelector('.typing');
+const roles = ["Frontend Developer", "Web Designer", "UI/UX Enthusiast"];
+let i = 0, j = 0, isDeleting = false;
 
-function typeWriter() {
-  if (i < text.length) {
-    typingElement.innerHTML += text.charAt(i);
-    i++;
-    setTimeout(typeWriter, 100);
+function typing() {
+  let current = roles[i];
+  if (!isDeleting && j <= current.length) {
+    typingElement.innerHTML = current.substring(0, j++);
+  } else if (isDeleting && j >= 0) {
+    typingElement.innerHTML = current.substring(0, j--);
+  }
+
+  if (!isDeleting && j === current.length) {
+    isDeleting = true;
+    setTimeout(typing, 1000);
+  } else if (isDeleting && j === 0) {
+    isDeleting = false;
+    i = (i + 1) % roles.length;
+    setTimeout(typing, 300);
+  } else {
+    setTimeout(typing, isDeleting ? 50 : 100);
   }
 }
+typing();
 
-window.onload = typeWriter;
-
-// Scroll to sections when menu items are clicked
-document.querySelectorAll('.nav-links a').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const targetSection = document.querySelector(this.getAttribute('href'));
-    targetSection.scrollIntoView({ behavior: 'smooth' });
-  });
-});
-
-// Efek mengetik
-new TypeIt("#typing", {
-  speed: 60,
-  loop: true
-})
-.type("Hello, welcome to my world ")
-.pause(1000)
-.delete()
-.type("I am Ipit, a Developer and Programmer")
-.pause(1000)
-.delete()
-.type("Nice to meet you")
-.pause(1000)
-.delete()
-.go();
-
-// Matrix effect
-const canvas = document.getElementById("matrix");
+// Galaxy background effect (stars)
+const canvas = document.getElementById("galaxy-bg");
 const ctx = canvas.getContext("2d");
+let stars = [];
 
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
-const letters = "PROGRAMER";
-const fontSize = 15;
-const columns = canvas.width / fontSize;
-const drops = Array.from({ length: columns }).fill(1);
-
-function drawMatrix() {
-  ctx.fillStyle = "rgba(10, 10, 10, 0.05)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#0f0";
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const text = letters.charAt(Math.floor(Math.random() * letters.length));
-    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-      drops[i] = 0;
-    }
-    drops[i]++;
+function createStars(count) {
+  stars = [];
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.5,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5
+    });
   }
 }
-setInterval(drawMatrix, 35);
+createStars(200);
 
-// Mode gelap/terang toggle
-document.getElementById("toggle-theme").addEventListener("click", () => {
-  document.body.classList.toggle("light");
-});
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let s of stars) {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    s.x += s.dx;
+    s.y += s.dy;
+
+    if (s.x < 0 || s.x > canvas.width) s.dx *= -1;
+    if (s.y < 0 || s.y > canvas.height) s.dy *= -1;
+  }
+  requestAnimationFrame(animateStars);
+}
+animateStars();
